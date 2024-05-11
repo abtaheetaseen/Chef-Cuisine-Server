@@ -46,9 +46,16 @@ async function run() {
         res.send(result);
     })
 
-    // get all food with sorting for top food section
+    // get all food with count sorting for top food section
     app.get("/foods", async (req, res) => {
         const cursor = foodCollection.find().sort({"count": -1});
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
+    // get all food with name sorting for top food section
+    app.get("/allFoods", async (req, res) => {
+        const cursor = foodCollection.find().sort({"foodName": 1});
         const result = await cursor.toArray();
         res.send(result);
     })
