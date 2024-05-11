@@ -46,7 +46,7 @@ async function run() {
         res.send(result);
     })
 
-    // get all food with sorting
+    // get all food with sorting for top food section
     app.get("/foods", async (req, res) => {
         const cursor = foodCollection.find().sort({"count": -1});
         const result = await cursor.toArray();
