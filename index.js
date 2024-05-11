@@ -27,7 +27,9 @@ async function run() {
     // await client.connect();
 
 
-    const userCollection = client.db("chefCuisineDB").collection("users")
+    // post users
+    const userCollection = client.db("chefCuisineDB").collection("users");
+    const foodCollection = client.db("chefCuisineDB").collection("foods");
 
     app.post("/users", async(req, res) => {
         const user = req.body;
@@ -36,6 +38,20 @@ async function run() {
         res.send(result);
     })
 
+    // post foods
+    app.post("/foods", async (req, res) => {
+        const foodItem = req.body;
+        console.log(foodItem)
+        const result = await foodCollection.insertOne(foodItem);
+        res.send(result);
+    })
+
+    // get all food with sorting
+    app.get("/foods", async (req, res) => {
+        const cursor = foodCollection.find().sort({"count": -1});
+        const result = await cursor.toArray();
+        res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
