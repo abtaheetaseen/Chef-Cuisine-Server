@@ -75,6 +75,30 @@ async function run() {
         res.send(result);
     })
 
+    // update single food item
+    app.put("/allFoods/:id", async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id : new ObjectId(id) };
+        const options = { upsert: true };
+        const updatedFoodItem = req.body;
+        const updatedDoc = {
+            $set: {
+                foodName: updatedFoodItem.foodName,
+                foodImage: updatedFoodItem.foodImage,
+                category: updatedFoodItem.category,
+                quantity: updatedFoodItem.quantity,
+                price: updatedFoodItem.price,
+                foodOrigin: updatedFoodItem.foodOrigin,
+                description: updatedFoodItem.description,
+                name: updatedFoodItem.name,
+                email: updatedFoodItem.email,
+            }
+        }
+
+        const result = await foodCollection.updateOne(filter, updatedDoc, options);
+        res.send(result);
+    })
+
     // post user orders and update quantity and count on foodCollection
     app.post("/orders", async (req, res) => {
         const {foodId} = req.body;
