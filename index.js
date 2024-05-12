@@ -111,6 +111,7 @@ async function run() {
 
     // get all food with name sorting for top food section
     app.get("/allFoods", async (req, res) => {
+        console.log(req.query);
         const cursor = foodCollection.find().sort({"foodName": 1});
         const result = await cursor.toArray();
         res.send(result);
