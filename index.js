@@ -9,7 +9,7 @@ app.use(express.json());
 
 // mongodb
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.ofi7kql.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -30,6 +30,7 @@ async function run() {
     // post users
     const userCollection = client.db("chefCuisineDB").collection("users");
     const foodCollection = client.db("chefCuisineDB").collection("foods");
+    const orderCollection = client.db("chefCuisineDB").collection("orders");
 
     app.post("/users", async(req, res) => {
         const user = req.body;
@@ -58,6 +59,33 @@ async function run() {
         const cursor = foodCollection.find().sort({"foodName": 1});
         const result = await cursor.toArray();
         res.send(result);
+    })
+
+    // get single food by id
+    app.get("/allFoods/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id : new ObjectId(id) };
+        const result = await foodCollection.findOne(query);
+        res.send(result);
+    })
+
+    app.post("/orders", async (req, res) => {
+        const {foodId} = req.body;
+        const {buyerQuantity} = req.body;
+        const orderedItem = req.body;
+        // console.log(orderedItem);
+        // console.log(foodId);
+        // console.log(buyerQuantity);
+
+        const foodResult = await foodCollection.findOneAndUpdate(
+            { _id : new ObjectId(foodId), quantity: {$gt: 0} },
+            {  $inc: { count: parseInt(buyerQuantity), quantity: -buyerQuantity } },
+        )
+        console.log(foodResult)
+
+        const result = await orderCollection.insertOne(orderedItem);
+        res.send(result);
+
     })
 
     // Send a ping to confirm a successful connection
