@@ -69,13 +69,11 @@ async function run() {
         res.send(result);
     })
 
+    // post user orders and update quantity and count on foodCollection
     app.post("/orders", async (req, res) => {
         const {foodId} = req.body;
         const {buyerQuantity} = req.body;
         const orderedItem = req.body;
-        // console.log(orderedItem);
-        // console.log(foodId);
-        // console.log(buyerQuantity);
 
         const foodResult = await foodCollection.findOneAndUpdate(
             { _id : new ObjectId(foodId), quantity: {$gt: 0} },
@@ -86,6 +84,17 @@ async function run() {
         const result = await orderCollection.insertOne(orderedItem);
         res.send(result);
 
+    })
+
+    // get specific user orders by email
+    app.get("/orders", async (req, res) => {
+        console.log(req.query.email)
+        let query = {};
+        if(req.query?.email){
+            query = {buyerEmail: req.query.email}
+        }
+        const result = await orderCollection.find(query).toArray();
+        res.send(result);
     })
 
     // Send a ping to confirm a successful connection
