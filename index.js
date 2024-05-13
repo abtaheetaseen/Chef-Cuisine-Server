@@ -87,6 +87,11 @@ async function run() {
     // registered users
     app.post("/users", async(req, res) => {
         const user = req.body;
+        const existingEmail = await userCollection.findOne({email: user.email})
+        if(existingEmail) {
+            console.log("User already exist in db")
+            return;
+        }
         const result = await userCollection.insertOne(user);
         res.send(result);
     })
@@ -209,7 +214,7 @@ async function run() {
         
         const result = await feedbackCollection.find().toArray();
         res.send(result);
-        
+
     })
 
     // Send a ping to confirm a successful connection
