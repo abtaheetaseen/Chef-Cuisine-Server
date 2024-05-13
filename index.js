@@ -60,6 +60,7 @@ async function run() {
     const userCollection = client.db("chefCuisineDB").collection("users");
     const foodCollection = client.db("chefCuisineDB").collection("foods");
     const orderCollection = client.db("chefCuisineDB").collection("orders");
+    const feedbackCollection = client.db("chefCuisineDB").collection("feedbacks");
 
     // jwt
     app.post("/jwt", async (req, res) => {
@@ -193,6 +194,13 @@ async function run() {
         const id = req.params.id;
         const query = { _id : new ObjectId(id) };
         const result = await orderCollection.deleteOne(query);
+        res.send(result);
+    })
+
+    // post method for gallery & feedbacks
+    app.post("/feedbacks", async (req, res) => {
+        const userFeedBack = req.body;
+        const result = await feedbackCollection.insertOne(userFeedBack);
         res.send(result);
     })
 
