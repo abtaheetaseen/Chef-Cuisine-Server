@@ -62,7 +62,7 @@ async function run() {
     const orderCollection = client.db("chefCuisineDB").collection("orders");
     const feedbackCollection = client.db("chefCuisineDB").collection("feedbacks");
 
-    // jwt
+    // jwt related work
     app.post("/jwt", async (req, res) => {
         const user = req.body;
         console.log("user for token", user);
