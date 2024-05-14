@@ -8,7 +8,8 @@ const cookieParser = require("cookie-parser");
 
 app.use(cors({
     origin: [
-        "http://localhost:5173", "http://localhost:5174"
+        "https://chef-cuisine-f99ae.firebaseapp.com",
+        "https://chef-cuisine-f99ae.web.app"
     ],
     credentials: true,
 }));
