@@ -120,8 +120,15 @@ async function run() {
     app.get("/allFoods", async (req, res) => {
         const page = parseInt(req.query.page);
         const size = parseInt(req.query.size);
+        console.log("search query", req.query)
 
-        const cursor = foodCollection.find().sort({"foodName": 1});
+        let query = {};
+
+        if(req.query.foodName){
+            query = { foodName: req.query.foodName }
+        }
+
+        const cursor = foodCollection.find(query).sort({"foodName": 1});
         const result = await cursor.skip(page * size).limit(size).toArray();
         res.send(result);
     })
