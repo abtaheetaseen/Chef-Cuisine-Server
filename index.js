@@ -72,8 +72,8 @@ async function run() {
         res
         .cookie("token", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none"
+            secure: false,
+            sameSite: "strict"
         })
         .send({success: true})
     })
@@ -120,13 +120,17 @@ async function run() {
     app.get("/allFoods", async (req, res) => {
         const page = parseInt(req.query.page);
         const size = parseInt(req.query.size);
-        console.log("search query", req.query)
+        const filter = req.query;
+        console.log("search query", filter)
+        
 
-        let query = {};
+        let query = {
+            foodName: {$regex: filter.search, $options: "i"}
+        };
 
-        if(req.query.foodName){
-            query = { foodName: req.query.foodName }
-        }
+        // if(req.query.foodName){
+        //     query = { foodName: req.query.foodName }
+        // }
 
         const cursor = foodCollection.find(query).sort({"foodName": 1});
         const result = await cursor.skip(page * size).limit(size).toArray();
