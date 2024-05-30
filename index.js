@@ -6,15 +6,25 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
-app.use(cors({
-    origin: [
-        "https://chef-cuisine-f99ae.firebaseapp.com",
-        "https://chef-cuisine-f99ae.web.app"
-    ],
-    credentials: true,
-}));
+
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors(
+//     {
+//     origin: [
+//         "https://chef-cuisine-f99ae.firebaseapp.com",
+//         "https://chef-cuisine-f99ae.web.app",
+//     ],
+//     credentials: true
+// }
+));
+
+// app.all('*', function (req, res) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
+//   res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS")
+// })
+
 
 // mongodb
 
@@ -31,25 +41,25 @@ const client = new MongoClient(uri, {
 });
 
 // middlewares
-const logger = (req, res, next) => {
-    console.log("log info: ", req.method, req.url);
-    next();
-}
+// const logger = (req, res, next) => {
+//     console.log("log info: ", req.method, req.url);
+//     next();
+// }
 
-const verifyToken = (req, res, next) => {
-    const token = req.cookies?.token;
-    if(!token){
-        return res.status(401).send({message: "Unauthorized Access"})
-    }
+// const verifyToken = (req, res, next) => {
+//     const token = req.cookies?.token;
+//     if(!token){
+//         return res.status(401).send({message: "Unauthorized Access"})
+//     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if(err){
-            return res.status(401).send({message: "Unauthorized Access"})
-        }
-        req.user = decoded;
-        next();
-    })
-}
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//         if(err){
+//             return res.status(401).send({message: "Unauthorized Access"})
+//         }
+//         req.user = decoded;
+//         next();
+//     })
+// }
 
 async function run() {
   try {
@@ -62,27 +72,55 @@ async function run() {
     const foodCollection = client.db("chefCuisineDB").collection("foods");
     const orderCollection = client.db("chefCuisineDB").collection("orders");
     const feedbackCollection = client.db("chefCuisineDB").collection("feedbacks");
+    const reservationCollection = client.db("chefCuisineDB").collection("reservations");
 
     // jwt related work
-    app.post("/jwt", async (req, res) => {
-        const user = req.body;
-        console.log("user for token", user);
-        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1d"})
+    // app.post("/jwt", async (req, res) => {
+    //     const user = req.body;
+    //     console.log("user for token", user);
+    //     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1d"})
+    //     console.log(token, 1)
+    //     console.log(process.env.ACCESS_TOKEN_SECRET, 2)
 
-        res
-        .cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "strict"
-        })
-        .send({success: true})
-    })
+    //     res
+    //     .cookie("token", token, {
+    //         httpOnly: true,
+    //         secure: false,
+    //         sameSite: "strict"
+    //     })
+    //     .send({success: true})
+    // })
 
     // when logout token not in cookie
-    app.post("/logout", async (req, res) => {
-        const user = req.body;
-        console.log("logging out", user);
-        res.clearCookie("token", {maxAge: 0}).send({success: true})
+    // app.post("/logout", async (req, res) => {
+    //     const user = req.body;
+    //     console.log("logging out", user);
+    //     res.clearCookie("token", {maxAge: 0}).send({success: true})
+    // })
+
+    // book table reservations
+    app.post("/reservations", async(req, res) => {
+        const bookTableData = req.body;
+        const result = await reservationCollection.insertOne(bookTableData);
+        res.send(result);
+    })
+
+    // get specific user reservations
+    app.get("/reservations", async(req, res) => {
+        let query = {};
+        if(req.query?.email){
+            query = {email: req.query.email}
+        }
+        const result = await reservationCollection.find(query).toArray();
+        res.send(result);
+    })
+
+    // cancel specific user reservation by user
+    app.delete("/reservations/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id : new ObjectId(id) };
+        const result = await reservationCollection.deleteOne(query);
+        res.send(result);
     })
 
     // registered users
@@ -193,11 +231,11 @@ async function run() {
     })
 
     // get specific user orders by email
-    app.get("/orders", logger, verifyToken, async (req, res) => {
-        console.log("token owner info : ", req.user)
-        if(req.user.email !== req.query.email){
-            return res.status(403).send({message: "Forbidden Access"})
-        }
+    app.get("/orders",  async (req, res) => {
+        // console.log("token owner info : ", req.user)
+        // if(req.user.email !== req.query.email){
+        //     return res.status(403).send({message: "Forbidden Access"})
+        // }
         let query = {};
         if(req.query?.email){
             query = {buyerEmail: req.query.email}
