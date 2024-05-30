@@ -10,13 +10,15 @@ const cookieParser = require("cookie-parser");
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(
-//     {
-//     origin: [
-//         "https://chef-cuisine-f99ae.firebaseapp.com",
-//         "https://chef-cuisine-f99ae.web.app",
-//     ],
-//     credentials: true
-// }
+    {
+    origin: [
+        "https://chef-cuisine-f99ae.firebaseapp.com",
+        "https://chef-cuisine-f99ae.web.app",
+        "http://localhost:5173",
+        "http://localhost:5174"
+    ],
+    credentials: true
+}
 ));
 
 // app.all('*', function (req, res) {
